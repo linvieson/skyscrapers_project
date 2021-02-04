@@ -1,5 +1,5 @@
 '''
-GitHub link: https://github.com/linvieson/skyscrapers_project
+GitHub link: https://github.com/linvieson/skyscrapers_project.git
 This modue checks if the skyscrapers combination on the board in winning or
 not.
 '''

@@ -11,7 +11,7 @@ setuptools.setup(
     description = 'A paskage to validate if the combination of skyscrapers on the board is winning or not.',
     long_description = long_description,
     long_description_content_type = 'text/markdown',
-    url = 'https://github.com/linvieson/skyscrapers_project',
+    url = 'https://github.com/linvieson/skyscrapers_project.git',
     packages = setuptools.find_packages(),
     classifiers = [
         'Programming language :: Python :: 3',
