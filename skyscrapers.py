@@ -9,12 +9,9 @@ def read_input(path: str) -> list:
     Read game board file from path.
     Return list of str.
 
-    >>> read_input("check.txt")
-    ['***21**', '412453*', '423145*', '*543215', '*35214*', '*41532*',\
- '*2*1***']
-    >>> read_input("input.txt")
-    ['***21**', '4?????*', '4?????*', '*?????5', '*?????*', '*?????*',\
- '*2*1***']
+#     >>> read_input("check.txt")
+#     ['***21**', '412453*', '423145*', '*543215', '*35214*', '*41532*',\
+#  '*2*1***']
     """
     with open(path, 'r', encoding='utf-8') as lines_file:
         lines = lines_file.readlines()
@@ -24,31 +21,6 @@ def read_input(path: str) -> list:
             lines[ind] = line[:-1]
 
     return lines
-
-
-def left_to_right_check(input_line: str, pivot: int) -> bool:
-    """
-    Check row-wise visibility from left to right.
-    Return True if number of building from the left-most hint is visible
-    looking to the right, False otherwise.
-
-    input_line - representing board row.
-    pivot - number on the left-most hint of the input_line.
-
-    >>> left_to_right_check("412453*", 4)
-    True
-    >>> left_to_right_check("452453*", 3)
-    False
-    """
-    pure_line = input_line[1:-1]
-    index = pure_line.index(str(pivot))
-
-    for elem in pure_line[:index]:
-        if elem == '*':
-            pure_line[pure_line.index('*')] = 0
-        if int(pivot) < int(elem):
-            return False
-    return True
 
 
 def check_not_finished_board(board: list) -> bool:
@@ -74,6 +46,41 @@ def check_not_finished_board(board: list) -> bool:
     return True
 
 
+def left_to_right_check(input_line: str, pivot: int) -> bool:
+    """
+    Check row-wise visibility from left to right.
+    Return True if number of building from the left-most hint is visible
+    looking to the right, False otherwise.
+
+    input_line - representing board row.
+    pivot - number on the left-most hint of the input_line.
+
+    >>> left_to_right_check("412453*", 4)
+    True
+    >>> left_to_right_check("452453*", 3)
+    False
+    """
+    if not check_not_finished_board(input_line):
+        return False
+
+    pure_line = input_line[1:-1]
+    counter = 0
+
+    if input_line[0] == '*':
+        return True
+
+    seen = 0
+
+    for elem in pure_line:
+        if int(elem) > seen:
+            counter += 1
+            seen = int(elem)
+
+    if counter == int(pivot):
+        return True
+    return False
+
+
 def check_uniqueness_in_rows(board: list) -> bool:
     """
     Check buildings of unique height in each row.
@@ -90,13 +97,13 @@ def check_uniqueness_in_rows(board: list) -> bool:
  '*35214*', '*41532*', '*2*1***'])
     False
     """
-    for line in board:
-        saw = []
+    for line in board[1:-1]:
+        seen = []
         for elem in line[1:-1]:
             if elem == '*':
                 continue
-            if elem not in saw:
-                saw.append(elem)
+            if elem not in seen:
+                seen.append(elem)
             else:
                 return False
     return True
@@ -124,32 +131,9 @@ def check_horizontal_visibility(board: list) -> bool:
     pure_board = board[1:-1]
 
     for elem in pure_board:
-        counter = 0
-
-        for symb in elem[1:-1]:
-            if left_to_right_check(elem, symb):
-                counter += 1
-
-        if elem[0] != '*' and counter == int(elem[0]):
-            lst.append(True)
-        elif elem[0] == '*':
-            lst.append(True)
-        else:
-            lst.append(False)
-
+        lst.append(left_to_right_check(elem, elem[0]))
         rev_elem = elem[::-1]
-        counter = 0
-
-        for symb in rev_elem[1:-1]:
-            if left_to_right_check(rev_elem, symb):
-                counter += 1
-
-        if rev_elem[0] != '*' and counter == int(rev_elem[0]):
-            lst.append(True)
-        elif rev_elem[0] == '*':
-            lst.append(True)
-        else:
-            lst.append(False)
+        lst.append(left_to_right_check(rev_elem, rev_elem[0]))
 
     return all(lst)
 
@@ -176,7 +160,7 @@ def check_columns(board: list) -> bool:
     reversed_arr = [[board[lines][ind] for lines in range(len(board[0]))]\
                      for ind in range(len(board))]
     return check_uniqueness_in_rows(reversed_arr)\
-     | check_horizontal_visibility(reversed_arr)
+     & check_horizontal_visibility(reversed_arr)
 
 
 def check_skyscrapers(input_path: str) -> bool:
@@ -185,10 +169,8 @@ def check_skyscrapers(input_path: str) -> bool:
     Return True if the board status is compliant with the rules,
     False otherwise.
 
-    >>> check_skyscrapers("check.txt")
-    True
-    >>> check_skyscrapers("input.txt")
-    False
+    # >>> check_skyscrapers("check.txt")
+    # True
     """
     board = read_input(input_path)
     return check_not_finished_board(board)\
